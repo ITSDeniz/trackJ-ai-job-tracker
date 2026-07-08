@@ -12,9 +12,7 @@ describe("Health Router", () => {
     } as unknown as Response;
 
     // Find the handler for GET /
-    const route = healthRouter.stack.find(
-      (layer) => layer.route?.path === "/"
-    );
+    const route = healthRouter.stack.find((layer) => layer.route?.path === "/");
     expect(route).toBeDefined();
 
     const handler = route!.route!.stack[0]!.handle;

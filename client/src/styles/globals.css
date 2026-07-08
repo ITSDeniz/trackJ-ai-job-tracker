@@ -22,6 +22,16 @@
     --input: 214 32% 91%;
     --ring: 199 89% 38%;
     --radius: 0.5rem;
+    --status-saved: 215 16% 47%;
+    --status-applied: 200 95% 39%;
+    --status-screening: 38 92% 50%;
+    --status-interviewing: 262 80% 50%;
+    --status-offer: 142 76% 36%;
+    --status-rejected: 0 72% 51%;
+    --status-withdrawn: 215 16% 47%;
+    --status-archived: 215 16% 47%;
+    --ai-accent: 245 58% 51%;
+    --ai-accent-foreground: 0 0% 100%;
   }
 
   * {
