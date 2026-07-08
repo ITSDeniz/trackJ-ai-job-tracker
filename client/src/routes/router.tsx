@@ -5,6 +5,7 @@ import { LoginPage } from "@/routes/LoginPage";
 import { RegisterPage } from "@/routes/RegisterPage";
 import { ProtectedLayout } from "@/features/auth/ProtectedLayout";
 import { ApplicationsPage } from "@/routes/ApplicationsPage";
+import { AiAssistantPage } from "@/routes/AiAssistantPage";
 
 export const router = createBrowserRouter([
   {
@@ -28,6 +29,10 @@ export const router = createBrowserRouter([
           {
             path: "/job-applications",
             element: <ApplicationsPage />,
+          },
+          {
+            path: "/ai-assistant",
+            element: <AiAssistantPage />,
           },
         ],
       },

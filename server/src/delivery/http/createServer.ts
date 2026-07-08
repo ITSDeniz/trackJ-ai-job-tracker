@@ -5,6 +5,7 @@ import { healthRouter } from "./routes/healthRouter.js";
 import { authRouter } from "./routes/authRouter.js";
 import { jobApplicationRouter } from "./routes/jobApplicationRouter.js";
 import { companyRouter } from "./routes/companyRouter.js";
+import { aiRouter } from "./routes/aiRouter.js";
 import { authMiddleware } from "./middleware/authMiddleware.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
@@ -24,6 +25,7 @@ export function createServer() {
   app.use("/api/v1/auth", authRouter);
   app.use("/api/v1/job-applications", authMiddleware, jobApplicationRouter);
   app.use("/api/v1/companies", authMiddleware, companyRouter);
+  app.use("/api/v1/ai", authMiddleware, aiRouter);
 
   app.use(errorHandler);
 

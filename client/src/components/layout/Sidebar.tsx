@@ -19,6 +19,7 @@ export function Sidebar({ className, onItemClick }: SidebarProps) {
     { to: "/job-applications", label: "Applications", icon: Briefcase },
     { to: "/companies", label: "Companies", icon: Building2 },
     { to: "/tasks", label: "Tasks", icon: CheckSquare },
+    { to: "/ai-assistant", label: "AI Assistant", icon: Sparkles },
   ];
 
   return (
