@@ -10,6 +10,10 @@ const ConfigSchema = z.object({
     .string()
     .min(1)
     .default("postgresql://postgres:postgres@localhost:5432/talentpilot"),
+  JWT_SECRET: z
+    .string()
+    .min(1)
+    .default("supersecretjwtsecretkeychangeinproduction"),
 });
 
 export function loadConfig() {
@@ -19,5 +23,6 @@ export function loadConfig() {
     nodeEnv: parsed.NODE_ENV,
     port: parsed.PORT,
     databaseUrl: parsed.DATABASE_URL,
+    jwtSecret: parsed.JWT_SECRET,
   };
 }

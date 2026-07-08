@@ -1,10 +1,10 @@
 import { Outlet } from "react-router-dom";
-import { AppShell } from "@/components/layout/AppShell";
+import { AuthProvider } from "@/features/auth/AuthContext";
 
 export function App() {
   return (
-    <AppShell>
+    <AuthProvider>
       <Outlet />
-    </AppShell>
+    </AuthProvider>
   );
 }
