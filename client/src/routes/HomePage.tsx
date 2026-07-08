@@ -11,13 +11,16 @@ export function HomePage() {
         className="flex flex-1 flex-col justify-center gap-6"
       >
         <div className="max-w-2xl">
-          <p className="text-sm font-medium text-muted-foreground">TalentPilot</p>
+          <p className="text-sm font-medium text-muted-foreground">
+            TalentPilot
+          </p>
           <h1 className="mt-3 text-4xl font-semibold tracking-normal text-foreground">
             AI job tracking, ready for the first real workflow.
           </h1>
           <p className="mt-4 text-base leading-7 text-muted-foreground">
-            The project scaffold is wired for React, Express, Prisma, PostgreSQL,
-            Tailwind, shadcn/ui, React Query, React Router, and Framer Motion.
+            The project scaffold is wired for React, Express, Prisma,
+            PostgreSQL, Tailwind, shadcn/ui, React Query, React Router, and
+            Framer Motion.
           </p>
         </div>
         <div>
