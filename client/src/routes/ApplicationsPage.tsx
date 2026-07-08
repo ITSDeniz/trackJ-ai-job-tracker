@@ -7,6 +7,12 @@ import {
   Trash2,
   SlidersHorizontal,
   Inbox,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  ChevronLeft,
+  ChevronRight,
+  MapPin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { apiClient } from "@/lib/api/apiClient";
@@ -28,25 +34,58 @@ interface ApiListResponse<T> {
 export function ApplicationsPage() {
   const queryClient = useQueryClient();
 
-  // Filters State
+  // Filters & Pagination State
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
+  const [companyFilter, setCompanyFilter] = useState<string>("all");
+  const [locationSearch, setLocationSearch] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  // Sorting State
+  const [sortField, setSortField] = useState<string>("createdAt");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   // Modals Control
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [activeApp, setActiveApp] = useState<JobApplicationData | null>(null);
 
-  // Fetch list query
+  // Fetch companies list for query dropdown filter
+  const { data: companiesResponse } = useQuery({
+    queryKey: ["companies"],
+    queryFn: async () => {
+      const res = await apiClient.get<{ id: string; name: string }[]>("/companies");
+      return res;
+    },
+  });
+
+  // Fetch applications list query
   const { data, isLoading, error } = useQuery({
-    queryKey: ["applications", statusFilter, priorityFilter, searchQuery],
+    queryKey: [
+      "applications",
+      statusFilter,
+      priorityFilter,
+      companyFilter,
+      locationSearch,
+      searchQuery,
+      currentPage,
+      pageSize,
+      sortField,
+      sortOrder,
+    ],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (statusFilter !== "all") params.append("status", statusFilter);
       if (priorityFilter !== "all") params.append("priority", priorityFilter);
+      if (companyFilter !== "all") params.append("companyId", companyFilter);
+      if (locationSearch.trim()) params.append("location", locationSearch.trim());
       if (searchQuery.trim()) params.append("search", searchQuery.trim());
-      params.append("pageSize", "100"); // Show all for easy MVP tracking
+
+      params.append("page", String(currentPage));
+      params.append("pageSize", String(pageSize));
+      params.append("sort", `${sortOrder === "desc" ? "-" : ""}${sortField}`);
 
       const res = await apiClient.get<ApiListResponse<JobApplicationData>>(
         `/job-applications?${params.toString()}`
@@ -61,6 +100,8 @@ export function ApplicationsPage() {
       apiClient.post("/job-applications", newApp),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["applications"] });
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-applications"] });
     },
   });
 
@@ -75,6 +116,8 @@ export function ApplicationsPage() {
     }) => apiClient.patch(`/job-applications/${id}`, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["applications"] });
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-applications"] });
     },
   });
 
@@ -83,6 +126,8 @@ export function ApplicationsPage() {
     mutationFn: (id: string) => apiClient.delete(`/job-applications/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["applications"] });
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-applications"] });
     },
   });
 
@@ -111,10 +156,37 @@ export function ApplicationsPage() {
 
   const handleDeleteConfirm = async () => {
     if (activeApp?.id) {
-      await deleteMutation.mutateAsync(activeApp.id);
-      setIsDeleteOpen(false);
-      setActiveApp(null);
+      try {
+        await deleteMutation.mutateAsync(activeApp.id);
+        setIsDeleteOpen(false);
+        setActiveApp(null);
+      } catch (err) {
+        console.error("Delete failed:", err);
+        // Keep dialog open so user can retry or cancel
+      }
     }
+  };
+
+  // Toggle sorting logic
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortOrder("asc");
+    }
+    setCurrentPage(1);
+  };
+
+  const getSortIcon = (field: string) => {
+    if (sortField !== field) {
+      return <ArrowUpDown className="ml-1 h-3.5 w-3.5 opacity-40 shrink-0" />;
+    }
+    return sortOrder === "asc" ? (
+      <ArrowUp className="ml-1 h-3.5 w-3.5 text-primary shrink-0" />
+    ) : (
+      <ArrowDown className="ml-1 h-3.5 w-3.5 text-primary shrink-0" />
+    );
   };
 
   const getStatusStyles = (status: string) => {
@@ -143,6 +215,11 @@ export function ApplicationsPage() {
       maximumFractionDigits: 0,
     }).format(amount);
   };
+
+  const totalCount = data?.pagination?.total || 0;
+  const totalPages = Math.ceil(totalCount / pageSize) || 1;
+  const startEntry = (currentPage - 1) * pageSize + 1;
+  const endEntry = Math.min(currentPage * pageSize, totalCount);
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-6">
@@ -175,7 +252,10 @@ export function ApplicationsPage() {
           ].map((tab) => (
             <button
               key={tab.value}
-              onClick={() => setStatusFilter(tab.value)}
+              onClick={() => {
+                setStatusFilter(tab.value);
+                setCurrentPage(1);
+              }}
               className={`py-3 px-1 border-b-2 font-medium text-sm transition-all focus:outline-none ${
                 statusFilter === tab.value
                   ? "border-primary text-primary"
@@ -189,26 +269,66 @@ export function ApplicationsPage() {
       </div>
 
       {/* Filters & Search Control Panel */}
-      <div className="flex flex-col sm:flex-row items-center gap-4 bg-card border border-border p-4 rounded-xl shadow-sm">
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 bg-card border border-border p-4 rounded-xl shadow-sm">
         {/* Search */}
-        <div className="relative w-full sm:flex-1">
+        <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search by role or company..."
+            placeholder="Search role/company..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1);
+            }}
             className="block w-full rounded-lg border border-input bg-background pl-9 pr-3 py-2 text-sm placeholder-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
           />
         </div>
 
+        {/* Location Filter */}
+        <div className="relative w-full">
+          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Filter by location..."
+            value={locationSearch}
+            onChange={(e) => {
+              setLocationSearch(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="block w-full rounded-lg border border-input bg-background pl-9 pr-3 py-2 text-sm placeholder-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
+          />
+        </div>
+
+        {/* Company Dropdown Filter */}
+        <div className="w-full">
+          <select
+            value={companyFilter}
+            onChange={(e) => {
+              setCompanyFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none text-muted-foreground"
+          >
+            <option value="all">All Companies</option>
+            {companiesResponse?.map((company) => (
+              <option key={company.id} value={company.id}>
+                {company.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {/* Priority Filter */}
-        <div className="flex items-center gap-2 w-full sm:w-auto">
+        <div className="flex items-center gap-2 w-full">
           <SlidersHorizontal className="h-4 w-4 text-muted-foreground hidden sm:block" />
           <select
             value={priorityFilter}
-            onChange={(e) => setPriorityFilter(e.target.value)}
-            className="block w-full sm:w-40 rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
+            onChange={(e) => {
+              setPriorityFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none text-muted-foreground"
           >
             <option value="all">All Priorities</option>
             <option value="high">High</option>
@@ -238,7 +358,7 @@ export function ApplicationsPage() {
           </div>
           <h3 className="mt-4 text-sm font-semibold text-foreground">No applications found</h3>
           <p className="mt-1 text-sm text-muted-foreground max-w-sm">
-            Get started by adding your first job application. You can track status, salary, priority and notes.
+            Try adjusting your search criteria or add your first job application.
           </p>
           <div className="mt-6">
             <Button onClick={handleOpenAdd} className="flex items-center gap-2">
@@ -247,109 +367,187 @@ export function ApplicationsPage() {
           </div>
         </div>
       ) : (
-        /* Applications Table List */
-        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-border bg-muted/30 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  <th className="px-5 py-3.5">Role</th>
-                  <th className="px-5 py-3.5">Company</th>
-                  <th className="px-5 py-3.5">Location</th>
-                  <th className="px-5 py-3.5">Salary Range</th>
-                  <th className="px-5 py-3.5">Priority</th>
-                  <th className="px-5 py-3.5">Status</th>
-                  <th className="px-5 py-3.5 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border text-sm">
-                {data.data.map((app) => (
-                  <tr key={app.id} className="hover:bg-muted/10 transition-colors">
-                    <td className="px-5 py-4">
-                      <div className="font-medium text-foreground">{app.title}</div>
-                      {app.jobPostingUrl && (
-                        <a
-                          href={app.jobPostingUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-xs text-primary hover:underline mt-0.5 inline-block"
-                        >
-                          View Listing
-                        </a>
-                      )}
-                    </td>
-                    <td className="px-5 py-4 text-muted-foreground">
-                      {app.companyName}
-                    </td>
-                    <td className="px-5 py-4 text-muted-foreground capitalize">
-                      {app.location || "—"}{" "}
-                      {app.workMode && app.workMode !== "unknown" && (
-                        <span className="text-xs text-muted-foreground/60 lowercase">
-                          ({app.workMode})
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-5 py-4 text-muted-foreground">
-                      {app.salaryMin || app.salaryMax ? (
-                        <>
-                          {app.salaryMin
-                            ? formatCurrency(app.salaryMin, app.salaryCurrency || "USD")
-                            : "—"}{" "}
-                          to{" "}
-                          {app.salaryMax
-                            ? formatCurrency(app.salaryMax, app.salaryCurrency || "USD")
-                            : "—"}
-                        </>
-                      ) : (
-                        "—"
-                      )}
-                    </td>
-                    <td className="px-5 py-4 text-muted-foreground capitalize">
-                      <span
-                        className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${
-                          app.priority === "high"
-                            ? "text-destructive bg-destructive/10"
-                            : app.priority === "medium"
-                              ? "text-primary bg-primary/10"
-                              : "text-muted-foreground bg-muted"
-                        }`}
-                      >
-                        {app.priority}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <span
-                        className={`inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-medium capitalize tracking-tight ${getStatusStyles(
-                          app.status
-                        )}`}
-                      >
-                        {app.status}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                          onClick={() => handleOpenEdit(app)}
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                          onClick={() => handleOpenDelete(app)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+        /* Table Layout Index */
+        <div className="space-y-4">
+          <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-border bg-muted/30 text-xs font-semibold uppercase tracking-wider text-muted-foreground select-none">
+                    <th
+                      className="px-5 py-3.5 cursor-pointer hover:bg-muted/50 transition-colors"
+                      onClick={() => handleSort("title")}
+                    >
+                      <div className="flex items-center">
+                        Role {getSortIcon("title")}
                       </div>
-                    </td>
+                    </th>
+                    <th className="px-5 py-3.5">Company</th>
+                    <th className="px-5 py-3.5">Location</th>
+                    <th className="px-5 py-3.5">Salary Range</th>
+                    <th
+                      className="px-5 py-3.5 cursor-pointer hover:bg-muted/50 transition-colors"
+                      onClick={() => handleSort("priority")}
+                    >
+                      <div className="flex items-center">
+                        Priority {getSortIcon("priority")}
+                      </div>
+                    </th>
+                    <th
+                      className="px-5 py-3.5 cursor-pointer hover:bg-muted/50 transition-colors"
+                      onClick={() => handleSort("status")}
+                    >
+                      <div className="flex items-center">
+                        Status {getSortIcon("status")}
+                      </div>
+                    </th>
+                    <th className="px-5 py-3.5 text-right sticky right-0 bg-muted/30">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-border text-sm">
+                  {data.data.map((app) => (
+                    <tr key={app.id} className="hover:bg-muted/10 transition-colors">
+                      <td className="px-5 py-4">
+                        <div className="font-medium text-foreground">{app.title}</div>
+                        {app.jobPostingUrl && (
+                          <a
+                            href={app.jobPostingUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-xs text-primary hover:underline mt-0.5 inline-block"
+                          >
+                            View Listing
+                          </a>
+                        )}
+                      </td>
+                      <td className="px-5 py-4 text-muted-foreground">
+                        {app.companyName}
+                      </td>
+                      <td className="px-5 py-4 text-muted-foreground capitalize">
+                        {app.location || "—"}{" "}
+                        {app.workMode && app.workMode !== "unknown" && (
+                          <span className="text-xs text-muted-foreground/60 lowercase">
+                            ({app.workMode})
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-5 py-4 text-muted-foreground">
+                        {app.salaryMin || app.salaryMax ? (
+                          <>
+                            {app.salaryMin
+                              ? formatCurrency(app.salaryMin, app.salaryCurrency || "USD")
+                              : "—"}{" "}
+                            to{" "}
+                            {app.salaryMax
+                              ? formatCurrency(app.salaryMax, app.salaryCurrency || "USD")
+                              : "—"}
+                          </>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                      <td className="px-5 py-4 text-muted-foreground capitalize">
+                        <span
+                          className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${
+                            app.priority === "high"
+                              ? "text-destructive bg-destructive/10"
+                              : app.priority === "medium"
+                                ? "text-primary bg-primary/10"
+                                : "text-muted-foreground bg-muted"
+                          }`}
+                        >
+                          {app.priority}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4">
+                        <span
+                          className={`inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-medium capitalize tracking-tight ${getStatusStyles(
+                            app.status
+                          )}`}
+                        >
+                          {app.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right sticky right-0 bg-card">
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground border border-transparent hover:border-border hover:bg-muted hover:text-foreground transition-colors"
+                            onClick={() => handleOpenEdit(app)}
+                          >
+                            <Edit2 className="h-3.5 w-3.5" />
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-destructive border border-transparent hover:border-destructive/30 hover:bg-destructive/10 transition-colors"
+                            onClick={() => handleOpenDelete(app)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Pagination Footer */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border border-border bg-card p-4 rounded-xl shadow-sm text-sm">
+            <div className="text-muted-foreground text-xs sm:text-sm">
+              Showing <span className="font-semibold text-foreground">{startEntry}</span> to{" "}
+              <span className="font-semibold text-foreground">{endEntry}</span> of{" "}
+              <span className="font-semibold text-foreground">{totalCount}</span> entries
+            </div>
+
+            <div className="flex items-center gap-3">
+              {/* Entries per page select */}
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span>Rows:</span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="rounded border border-input bg-background px-1.5 py-0.5 text-xs focus:border-primary focus:outline-none"
+                >
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                </select>
+              </div>
+
+              {/* Prev / Next buttons */}
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  aria-label="Previous Page"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="text-xs text-muted-foreground px-2">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  aria-label="Next Page"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       )}

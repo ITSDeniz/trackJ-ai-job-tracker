@@ -4,11 +4,17 @@ import { AnyZodObject, ZodError } from "zod";
 export const validateRequest = (schema: AnyZodObject) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await schema.parseAsync({
+      const parsed = await schema.parseAsync({
         body: req.body,
         query: req.query,
         params: req.params,
       });
+      req.body = parsed.body ?? req.body;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      req.query = (parsed.query ?? req.query) as any;
+      if (parsed.params !== undefined) {
+        req.params = parsed.params;
+      }
       next();
     } catch (error) {
       if (error instanceof ZodError) {

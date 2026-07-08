@@ -138,6 +138,9 @@ export class PrismaJobApplicationRepository
     if (filters.companyId) {
       where.companyId = filters.companyId;
     }
+    if (filters.location) {
+      where.location = { contains: filters.location, mode: "insensitive" };
+    }
     if (filters.nextActionBefore) {
       where.nextActionAt = {
         lte: filters.nextActionBefore,

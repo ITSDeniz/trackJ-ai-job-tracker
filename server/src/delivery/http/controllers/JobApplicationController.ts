@@ -57,6 +57,7 @@ export class JobApplicationController {
         status?: string;
         priority?: string;
         companyId?: string;
+        location?: string;
         search?: string;
         nextActionBefore?: Date;
         sort?: string;
@@ -85,6 +86,7 @@ export class JobApplicationController {
           status: query.status,
           priority: query.priority,
           companyId: query.companyId,
+          location: query.location,
           search: query.search,
           nextActionBefore: query.nextActionBefore,
         },
@@ -99,11 +101,13 @@ export class JobApplicationController {
       });
 
       res.status(200).json({
-        data: result.data,
-        pagination: {
-          page,
-          pageSize,
-          total: result.total,
+        data: {
+          data: result.data,
+          pagination: {
+            page,
+            pageSize,
+            total: result.total,
+          },
         },
       });
     } catch (error) {

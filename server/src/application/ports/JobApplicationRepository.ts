@@ -4,6 +4,7 @@ export interface JobApplicationFilters {
   status?: string;
   priority?: string;
   companyId?: string;
+  location?: string;
   search?: string;
   nextActionBefore?: Date;
 }

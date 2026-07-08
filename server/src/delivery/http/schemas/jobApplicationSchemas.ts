@@ -37,8 +37,20 @@ export const CreateJobApplicationSchema = z.object({
     location: z.string().trim().nullable().optional(),
     workMode: WorkModeEnum.default("unknown"),
     employmentType: EmploymentTypeEnum.default("unknown"),
-    salaryMin: z.coerce.number().int().nonnegative().nullable().optional(),
-    salaryMax: z.coerce.number().int().nonnegative().nullable().optional(),
+    salaryMin: z.coerce
+      .number()
+      .int()
+      .nonnegative()
+      .max(2147483647, "Salary must be less than 2,147,483,648")
+      .nullable()
+      .optional(),
+    salaryMax: z.coerce
+      .number()
+      .int()
+      .nonnegative()
+      .max(2147483647, "Salary must be less than 2,147,483,648")
+      .nullable()
+      .optional(),
     salaryCurrency: z.string().trim().max(10).nullable().optional(),
     appliedAt: z
       .string()
@@ -58,6 +70,9 @@ export const CreateJobApplicationSchema = z.object({
 });
 
 export const UpdateJobApplicationSchema = z.object({
+  params: z.object({
+    id: z.string(),
+  }),
   body: z.object({
     companyName: z
       .string()
@@ -72,8 +87,20 @@ export const UpdateJobApplicationSchema = z.object({
     location: z.string().trim().nullable().optional(),
     workMode: WorkModeEnum.optional(),
     employmentType: EmploymentTypeEnum.optional(),
-    salaryMin: z.coerce.number().int().nonnegative().nullable().optional(),
-    salaryMax: z.coerce.number().int().nonnegative().nullable().optional(),
+    salaryMin: z.coerce
+      .number()
+      .int()
+      .nonnegative()
+      .max(2147483647, "Salary must be less than 2,147,483,648")
+      .nullable()
+      .optional(),
+    salaryMax: z.coerce
+      .number()
+      .int()
+      .nonnegative()
+      .max(2147483647, "Salary must be less than 2,147,483,648")
+      .nullable()
+      .optional(),
     salaryCurrency: z.string().trim().max(10).nullable().optional(),
     appliedAt: z
       .string()
@@ -108,6 +135,7 @@ export const GetJobApplicationsQuerySchema = z.object({
     status: StatusEnum.optional(),
     priority: PriorityEnum.optional(),
     companyId: z.string().trim().optional(),
+    location: z.string().trim().optional(),
     search: z.string().trim().optional(),
     nextActionBefore: z
       .string()
