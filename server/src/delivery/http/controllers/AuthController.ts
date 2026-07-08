@@ -57,11 +57,9 @@ export class AuthController {
     try {
       const userId = req.user?.id;
       if (!userId) {
-        res
-          .status(401)
-          .json({
-            error: { code: "unauthorized", message: "Not authenticated" },
-          });
+        res.status(401).json({
+          error: { code: "unauthorized", message: "Not authenticated" },
+        });
         return;
       }
       const user = await userRepository.findById(userId);
