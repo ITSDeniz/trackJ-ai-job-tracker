@@ -131,8 +131,8 @@ export function ApplicationDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm overflow-y-auto">
-      <div className="w-full max-w-2xl rounded-xl border border-border bg-card shadow-lg flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
+      <div className="w-full max-w-2xl rounded-xl border border-border bg-card shadow-lg flex flex-col" style={{ maxHeight: 'min(90vh, 700px)' }}>
         {/* Header */}
         <div className="px-6 py-4 border-b border-border flex items-center justify-between shrink-0">
           <h3 className="text-lg font-semibold text-foreground tracking-tight">
@@ -147,9 +147,9 @@ export function ApplicationDialog({
           </button>
         </div>
 
-        {/* Content Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-y-auto">
-          <div className="p-6 space-y-6 flex-1">
+        {/* Content Form — body scrolls, footer is outside and always visible */}
+        <form onSubmit={handleSubmit} className="flex flex-col min-h-0 flex-1">
+          <div className="p-6 space-y-6 overflow-y-auto flex-1">
             {errorMsg && (
               <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
                 {errorMsg}
@@ -395,8 +395,8 @@ export function ApplicationDialog({
             </div>
           </div>
 
-          {/* Footer Actions */}
-          <div className="px-6 py-4 border-t border-border flex items-center justify-end gap-3 shrink-0">
+          {/* Footer Actions — always anchored at bottom, outside scroll area */}
+          <div className="px-6 py-4 border-t border-border flex items-center justify-end gap-3 shrink-0 bg-card">
             <Button
               type="button"
               variant="ghost"
@@ -405,7 +405,7 @@ export function ApplicationDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting} id="submit-application-btn">
               {isSubmitting ? (
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
               ) : application ? (

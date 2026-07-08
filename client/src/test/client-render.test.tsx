@@ -3,15 +3,26 @@ import { render, screen } from "@testing-library/react";
 import { HomePage } from "../routes/HomePage";
 import { AuthProvider } from "@/features/auth/AuthContext";
 import { MemoryRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
 
 describe("HomePage Component", () => {
   it("should render landing elements successfully", () => {
     render(
-      <MemoryRouter>
-        <AuthProvider>
-          <HomePage />
-        </AuthProvider>
-      </MemoryRouter>,
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <AuthProvider>
+            <HomePage />
+          </AuthProvider>
+        </MemoryRouter>
+      </QueryClientProvider>
     );
 
     // Assert that the page title heading exists

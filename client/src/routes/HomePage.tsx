@@ -1,3 +1,5 @@
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Plus,
@@ -8,80 +10,84 @@ import {
   Clock,
   ArrowRight,
   Sparkles,
+  Inbox,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/AuthContext";
+import { apiClient } from "@/lib/api/apiClient";
+
+interface JobApplicationData {
+  id: string;
+  title: string;
+  companyName: string;
+  status: string;
+  priority: string;
+  appliedAt: string | null;
+  location: string | null;
+}
+
+interface ApiListResponse {
+  data: JobApplicationData[];
+  pagination: {
+    total: number;
+  };
+}
 
 export function HomePage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
-  // Mocked statistic figures
+  // Fetch all applications for calculating stats & showing recent entries
+  const { data, isLoading } = useQuery({
+    queryKey: ["dashboard-applications"],
+    queryFn: async () => {
+      return apiClient.get<ApiListResponse>("/job-applications?pageSize=100");
+    },
+  });
+
+  const applications = data?.data || [];
+  const totalCount = data?.pagination?.total || 0;
+
+  // Calculate stats dynamically from real database data
+  const interviewsCount = applications.filter((app) => app.status === "interviewing").length;
+  const offersCount = applications.filter((app) => app.status === "offer").length;
+  const pendingCount = applications.filter(
+    (app) => app.status === "screening" || app.status === "applied"
+  ).length;
+
   const stats = [
     {
       label: "Total Applications",
-      value: 12,
-      change: "+3 this week",
+      value: totalCount,
+      change: "Active in pipeline",
       icon: FileText,
       color: "text-status-applied",
     },
     {
       label: "Active Interviews",
-      value: 2,
-      change: "Next: tomorrow",
+      value: interviewsCount,
+      change: "Keep preparing",
       icon: Calendar,
       color: "text-status-interviewing",
     },
     {
       label: "Offers Received",
-      value: 1,
-      change: "Reviewing details",
+      value: offersCount,
+      change: "Review details",
       icon: TrendingUp,
       color: "text-status-offer",
     },
     {
-      label: "Pending Actions",
-      value: 3,
-      change: "1 due today",
+      label: "Pending Feedback",
+      value: pendingCount,
+      change: "Awaiting response",
       icon: Clock,
       color: "text-status-screening",
     },
   ];
 
-  // Mocked recent applications list
-  const recentApplications = [
-    {
-      id: "1",
-      role: "Senior Frontend Engineer",
-      company: "Stripe",
-      appliedDate: "July 06, 2026",
-      priority: "high",
-      status: "interviewing",
-    },
-    {
-      id: "2",
-      role: "Product Designer",
-      company: "Linear",
-      appliedDate: "July 04, 2026",
-      priority: "medium",
-      status: "offer",
-    },
-    {
-      id: "3",
-      role: "Software Developer",
-      company: "Vercel",
-      appliedDate: "June 28, 2026",
-      priority: "high",
-      status: "applied",
-    },
-    {
-      id: "4",
-      role: "Backend Engineer",
-      company: "Supabase",
-      appliedDate: "June 25, 2026",
-      priority: "low",
-      status: "saved",
-    },
-  ];
+  // Show top 4 most recent applications
+  const recentApplications = applications.slice(0, 4);
 
   const getStatusStyles = (status: string) => {
     switch (status) {
@@ -102,6 +108,19 @@ export function HomePage() {
     }
   };
 
+  const formatDate = (dateStr: string | null) => {
+    if (!dateStr) return "—";
+    try {
+      return new Date(dateStr).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+    } catch {
+      return "—";
+    }
+  };
+
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Greeting Header */}
@@ -112,12 +131,10 @@ export function HomePage() {
         className="mb-8"
       >
         <h1 className="text-2xl font-semibold text-foreground tracking-tight sm:text-3xl">
-          Welcome back,{" "}
-          {user?.name || user?.email?.split("@")[0] || "Candidate"}
+          Welcome back, {user?.name || user?.email?.split("@")[0] || "Candidate"}
         </h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
-          Here is an overview of your active search. You have 3 actions that
-          require attention.
+          Here is the live status of your job search pipeline.
         </p>
       </motion.section>
 
@@ -139,7 +156,7 @@ export function HomePage() {
             </div>
             <div className="mt-3 flex items-baseline gap-2">
               <span className="text-3xl font-semibold tracking-tight text-foreground">
-                {stat.value}
+                {isLoading ? "..." : stat.value}
               </span>
               <span className="text-xs font-medium text-muted-foreground">
                 {stat.change}
@@ -157,58 +174,80 @@ export function HomePage() {
             <h2 className="text-lg font-semibold text-foreground tracking-tight">
               Recent Applications
             </h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-xs font-medium text-primary hover:text-primary/95 flex items-center gap-1"
+            <Link
+              to="/job-applications"
+              className="text-xs font-medium text-primary hover:text-primary/95 flex items-center gap-1 hover:underline"
             >
               View all <ArrowRight className="h-3.5 w-3.5" />
-            </Button>
+            </Link>
           </div>
 
-          <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-border bg-muted/30 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    <th className="px-5 py-3.5">Role</th>
-                    <th className="px-5 py-3.5">Company</th>
-                    <th className="px-5 py-3.5">Applied Date</th>
-                    <th className="px-5 py-3.5">Priority</th>
-                    <th className="px-5 py-3.5">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border text-sm">
-                  {recentApplications.map((app) => (
-                    <tr
-                      key={app.id}
-                      className="hover:bg-muted/10 transition-colors"
-                    >
-                      <td className="px-5 py-4 font-medium text-foreground">
-                        {app.role}
-                      </td>
-                      <td className="px-5 py-4 text-muted-foreground">
-                        {app.company}
-                      </td>
-                      <td className="px-5 py-4 text-muted-foreground whitespace-nowrap">
-                        {app.appliedDate}
-                      </td>
-                      <td className="px-5 py-4 text-muted-foreground capitalize">
-                        {app.priority}
-                      </td>
-                      <td className="px-5 py-4">
-                        <span
-                          className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium capitalize tracking-tight ${getStatusStyles(app.status)}`}
-                        >
-                          {app.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-20 border border-border bg-card rounded-xl">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mb-3" />
+              <p className="text-xs text-muted-foreground font-medium">Loading applications...</p>
             </div>
-          </div>
+          ) : recentApplications.length === 0 ? (
+            <div className="flex flex-col items-center justify-center text-center p-12 border border-dashed border-border bg-card rounded-xl">
+              <Inbox className="h-8 w-8 text-muted-foreground mb-3" />
+              <h3 className="text-sm font-semibold text-foreground">No applications tracked yet</h3>
+              <p className="text-xs text-muted-foreground max-w-xs mt-1">
+                Start adding roles to see them here on your dashboard pipeline.
+              </p>
+              <Button onClick={() => navigate("/job-applications")} className="mt-4 shrink-0" size="sm">
+                Add your first application
+              </Button>
+            </div>
+          ) : (
+            <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-border bg-muted/30 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      <th className="px-5 py-3.5">Role</th>
+                      <th className="px-5 py-3.5">Company</th>
+                      <th className="px-5 py-3.5">Applied Date</th>
+                      <th className="px-5 py-3.5">Priority</th>
+                      <th className="px-5 py-3.5">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border text-sm">
+                    {recentApplications.map((app) => (
+                      <tr key={app.id} className="hover:bg-muted/10 transition-colors">
+                        <td className="px-5 py-4 font-medium text-foreground">{app.title}</td>
+                        <td className="px-5 py-4 text-muted-foreground">{app.companyName}</td>
+                        <td className="px-5 py-4 text-muted-foreground whitespace-nowrap">
+                          {formatDate(app.appliedAt)}
+                        </td>
+                        <td className="px-5 py-4 text-muted-foreground capitalize">
+                          <span
+                            className={`inline-flex items-center rounded px-1.5 py-0.5 text-xs font-semibold ${
+                              app.priority === "high"
+                                ? "text-destructive bg-destructive/10"
+                                : app.priority === "medium"
+                                  ? "text-primary bg-primary/10"
+                                  : "text-muted-foreground bg-muted"
+                            }`}
+                          >
+                            {app.priority}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4">
+                          <span
+                            className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium capitalize tracking-tight ${getStatusStyles(
+                              app.status
+                            )}`}
+                          >
+                            {app.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </section>
 
         {/* Right Column: Quick Actions & Co-pilot Updates */}
@@ -219,18 +258,23 @@ export function HomePage() {
               Quick Actions
             </h2>
             <div className="grid gap-2">
-              <Button className="w-full flex items-center justify-start gap-2.5 py-2.5">
+              <Button
+                onClick={() => navigate("/job-applications")}
+                className="w-full flex items-center justify-start gap-2.5 py-2.5"
+              >
                 <Plus className="h-4 w-4" /> Add Application
               </Button>
               <Button
                 variant="outline"
-                className="w-full flex items-center justify-start gap-2.5 py-2.5 text-muted-foreground hover:text-foreground"
+                className="w-full flex items-center justify-start gap-2.5 py-2.5 text-muted-foreground hover:text-foreground cursor-not-allowed"
+                disabled
               >
                 <Calendar className="h-4 w-4" /> Schedule Interview
               </Button>
               <Button
                 variant="outline"
-                className="w-full flex items-center justify-start gap-2.5 py-2.5 text-muted-foreground hover:text-foreground"
+                className="w-full flex items-center justify-start gap-2.5 py-2.5 text-muted-foreground hover:text-foreground cursor-not-allowed"
+                disabled
               >
                 <CheckSquare className="h-4 w-4" /> Create Task
               </Button>
@@ -246,17 +290,10 @@ export function HomePage() {
               </span>
             </div>
             <p className="mt-3 text-sm text-muted-foreground leading-normal">
-              Based on your Stripe application status, you should expect an
-              initial screening interview soon.
+              {totalCount === 0
+                ? "Start tracking job applications to receive tailored suggestions and next actions from the AI Co-pilot."
+                : "Active applications detected. We are compiling tailored requirements analyses and interview preparation notes."}
             </p>
-            <div className="mt-4 pt-3 border-t border-ai/10">
-              <Button
-                variant="link"
-                className="p-0 h-auto text-xs text-ai hover:underline flex items-center gap-1 font-semibold"
-              >
-                Prepare for screening <ArrowRight className="h-3 w-3" />
-              </Button>
-            </div>
           </div>
         </section>
       </div>
