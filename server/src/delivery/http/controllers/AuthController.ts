@@ -5,6 +5,7 @@ import { PrismaUserRepository } from "../../../infrastructure/database/PrismaUse
 import { BcryptHashService } from "../../../infrastructure/security/BcryptHashService.js";
 import { JwtTokenService } from "../../../infrastructure/security/JwtTokenService.js";
 import { loadConfig } from "../../../config/loadConfig.js";
+import { AuthenticatedRequest } from "../middleware/authMiddleware.js";
 
 const config = loadConfig();
 const userRepository = new PrismaUserRepository();
@@ -53,7 +54,7 @@ export class AuthController {
     }
   }
 
-  async me(req: any, res: Response, next: NextFunction) {
+  async me(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.user?.id;
       if (!userId) {

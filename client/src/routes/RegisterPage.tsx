@@ -25,7 +25,7 @@ export function RegisterPage() {
     try {
       await register(email, password, name || undefined);
       navigate("/", { replace: true });
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (err instanceof ApiError) {
         setErrorMsg(err.message);
         if (err.fields) {

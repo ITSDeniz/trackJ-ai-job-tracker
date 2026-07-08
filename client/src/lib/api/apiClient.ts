@@ -42,7 +42,7 @@ async function request<T>(
     return {} as T;
   }
 
-  let json: any;
+  let json: { error?: ApiErrorResponse; data?: T; message?: string };
   try {
     json = await response.json();
   } catch {
@@ -62,13 +62,13 @@ async function request<T>(
 export const apiClient = {
   get: <T>(endpoint: string, options?: RequestInit) =>
     request<T>(endpoint, { ...options, method: "GET" }),
-  post: <T>(endpoint: string, body?: any, options?: RequestInit) =>
+  post: <T>(endpoint: string, body?: unknown, options?: RequestInit) =>
     request<T>(endpoint, {
       ...options,
       method: "POST",
       body: body ? JSON.stringify(body) : undefined,
     }),
-  patch: <T>(endpoint: string, body?: any, options?: RequestInit) =>
+  patch: <T>(endpoint: string, body?: unknown, options?: RequestInit) =>
     request<T>(endpoint, {
       ...options,
       method: "PATCH",

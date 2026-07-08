@@ -24,7 +24,7 @@ export function LoginPage() {
     try {
       await login(email, password);
       navigate("/", { replace: true });
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (err instanceof ApiError) {
         setErrorMsg(err.message);
         if (err.fields) {

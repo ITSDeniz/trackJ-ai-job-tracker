@@ -36,7 +36,7 @@ export function authMiddleware(
     };
 
     next();
-  } catch (error) {
+  } catch {
     next(new UnauthorizedError("Authentication token is invalid or expired."));
   }
 }
