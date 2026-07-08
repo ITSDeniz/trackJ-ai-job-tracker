@@ -1,6 +1,8 @@
-import { Menu, User, LogOut } from "lucide-react";
+import { Menu, User, LogOut, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/AuthContext";
+import { useTheme } from "@/features/theme/ThemeContext";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -8,6 +10,7 @@ interface HeaderProps {
 
 export function Header({ onMenuToggle }: HeaderProps) {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <header className="flex h-14 items-center justify-between border-b border-border bg-card px-4 text-card-foreground lg:px-6">
@@ -39,6 +42,32 @@ export function Header({ onMenuToggle }: HeaderProps) {
               {user?.name || user?.email || "Candidate"}
             </span>
           </div>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            className="text-muted-foreground hover:text-foreground relative"
+            aria-label="Toggle theme"
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={theme}
+                initial={{ y: -10, opacity: 0, scale: 0.8, rotate: -45 }}
+                animate={{ y: 0, opacity: 1, scale: 1, rotate: 0 }}
+                exit={{ y: 10, opacity: 0, scale: 0.8, rotate: 45 }}
+                transition={{ duration: 0.15 }}
+                className="flex items-center justify-center"
+              >
+                {theme === "dark" ? (
+                  <Sun className="h-4 w-4 text-amber-500" />
+                ) : (
+                  <Moon className="h-4 w-4" />
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </Button>
 
           <Button
             type="button"
