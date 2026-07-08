@@ -1,0 +1,12 @@
+node_modules/
+dist/
+build/
+coverage/
+.DS_Store
+.env
+.env.*
+!.env.example
+*.log
+*.tsbuildinfo
+client/.vite/
+server/prisma/migrations/*/migration_lock.toml
