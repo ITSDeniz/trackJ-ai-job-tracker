@@ -18,6 +18,40 @@ enum JobApplicationStatus {
   archived
 }
 
+enum JobApplicationPriority {
+  low
+  medium
+  high
+}
+
+enum WorkMode {
+  remote
+  hybrid
+  onsite
+  unknown
+}
+
+enum EmploymentType {
+  full_time
+  part_time
+  contract
+  internship
+  unknown
+}
+
+enum InterviewStatus {
+  scheduled
+  completed
+  cancelled
+  rescheduled
+}
+
+enum TaskSource {
+  user
+  ai_suggested
+  system
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -26,20 +60,203 @@ model User {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   jobApplications JobApplication[]
+  companies       Company[]
+  contacts        Contact[]
+  interviews      Interview[]
+  tasks           Task[]
+  documents       Document[]
+  notes           Note[]
+  aiOperations    AIOperation[]
 
   @@map("users")
 }
 
+model Company {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  name      String
+  website   String?
+  industry  String?
+  size      String?
+  location  String?
+  notes     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobApplications JobApplication[]
+  contacts        Contact[]
+
+  @@index([userId, name])
+  @@map("companies")
+}
+
 model JobApplication {
-  id        String               @id @default(cuid())
-  userId    String               @map("user_id")
-  title     String
-  status    JobApplicationStatus @default(saved)
-  createdAt DateTime             @default(now()) @map("created_at")
-  updatedAt DateTime             @updatedAt @map("updated_at")
+  id             String                 @id @default(cuid())
+  userId         String                 @map("user_id")
+  companyId      String                 @map("company_id")
+  title          String
+  status         JobApplicationStatus   @default(saved)
+  priority       JobApplicationPriority @default(medium)
+  source         String?
+  jobPostingUrl  String?                @map("job_posting_url")
+  location       String?
+  workMode       WorkMode               @default(unknown) @map("work_mode")
+  employmentType EmploymentType         @default(unknown) @map("employment_type")
+  salaryMin      Int?                   @map("salary_min")
+  salaryMax      Int?                   @map("salary_max")
+  salaryCurrency String?                @map("salary_currency")
+  appliedAt      DateTime?              @map("applied_at")
+  nextActionAt   DateTime?              @map("next_action_at")
+  closedAt       DateTime?              @map("closed_at")
+  description    String?
+  notes          String?
+  createdAt      DateTime               @default(now()) @map("created_at")
+  updatedAt      DateTime               @updatedAt @map("updated_at")
+
+  user         User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company      Company               @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  interviews   Interview[]
+  tasks        Task[]
+  documents    ApplicationDocument[]
+  aiOperations AIOperation[]
+
+  @@index([userId, status])
+  @@index([userId, companyId])
+  @@index([userId, createdAt])
+  @@index([userId, updatedAt])
+  @@index([userId, appliedAt])
+  @@index([userId, nextActionAt])
+  @@map("job_applications")
+}
+
+model Contact {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  companyId  String   @map("company_id")
+  name       String
+  role       String?
+  email      String?
+  phone      String?
+  linkedinUrl String?  @map("linkedin_url")
+  notes      String?
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([userId, companyId])
+  @@map("contacts")
+}
+
+model Interview {
+  id              String          @id @default(cuid())
+  userId          String          @map("user_id")
+  jobApplicationId String         @map("job_application_id")
+  title           String
+  interviewType   String          @map("interview_type")
+  scheduledAt     DateTime        @map("scheduled_at")
+  durationMinutes Int             @map("duration_minutes")
+  location        String?
+  meetingUrl      String?         @map("meeting_url")
+  status          InterviewStatus @default(scheduled)
+  notes           String?
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobApplication JobApplication @relation(fields: [jobApplicationId], references: [id], onDelete: Cascade)
+
+  @@index([userId, jobApplicationId])
+  @@index([userId, scheduledAt])
+  @@map("interviews")
+}
+
+model Task {
+  id              String     @id @default(cuid())
+  userId          String     @map("user_id")
+  jobApplicationId String?    @map("job_application_id")
+  title           String
+  description     String?
+  dueAt           DateTime   @map("due_at")
+  completedAt     DateTime?  @map("completed_at")
+  source          TaskSource @default(user)
+  createdAt       DateTime   @map("created_at") @default(now())
+  updatedAt       DateTime   @updatedAt @map("updated_at")
+
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobApplication JobApplication? @relation(fields: [jobApplicationId], references: [id], onDelete: Cascade)
+
+  @@index([userId, jobApplicationId])
+  @@index([userId, dueAt])
+  @@map("tasks")
+}
+
+model Document {
+  id           String   @id @default(cuid())
+  userId       String   @map("user_id")
+  name         String
+  documentType String   @map("document_type")
+  storageKey   String   @map("storage_key")
+  mimeType     String   @map("mime_type")
+  versionLabel String?  @map("version_label")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobApplications ApplicationDocument[]
+
+  @@map("documents")
+}
+
+model ApplicationDocument {
+  id               String   @id @default(cuid())
+  jobApplicationId String   @map("job_application_id")
+  documentId       String   @map("document_id")
+  purpose          String
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  jobApplication JobApplication @relation(fields: [jobApplicationId], references: [id], onDelete: Cascade)
+  document       Document       @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([jobApplicationId, documentId])
+  @@map("application_documents")
+}
+
+model Note {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  entityType String   @map("entity_type")
+  entityId   String   @map("entity_id")
+  body       String
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId, status])
-  @@map("job_applications")
+  @@index([userId, entityType, entityId])
+  @@map("notes")
+}
+
+model AIOperation {
+  id              String    @id @default(cuid())
+  userId          String    @map("user_id")
+  jobApplicationId String?   @map("job_application_id")
+  operationType   String    @map("operation_type")
+  provider        String
+  model           String
+  status          String
+  inputReference  String?   @map("input_reference")
+  outputReference String?   @map("output_reference")
+  costUnits       Int?      @map("cost_units")
+  errorCode       String?   @map("error_code")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  completedAt     DateTime? @map("completed_at")
+
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobApplication JobApplication? @relation(fields: [jobApplicationId], references: [id], onDelete: Cascade)
+
+  @@index([userId, jobApplicationId])
+  @@map("ai_operations")
 }
