@@ -4,6 +4,7 @@ import { HomePage } from "@/routes/HomePage";
 import { LoginPage } from "@/routes/LoginPage";
 import { RegisterPage } from "@/routes/RegisterPage";
 import { ProtectedLayout } from "@/features/auth/ProtectedLayout";
+import { ApplicationsPage } from "@/routes/ApplicationsPage";
 
 export const router = createBrowserRouter([
   {
@@ -23,6 +24,10 @@ export const router = createBrowserRouter([
           {
             path: "/",
             element: <HomePage />,
+          },
+          {
+            path: "/job-applications",
+            element: <ApplicationsPage />,
           },
         ],
       },
