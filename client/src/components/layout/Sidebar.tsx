@@ -15,7 +15,7 @@ interface SidebarProps {
 
 export function Sidebar({ className, onItemClick }: SidebarProps) {
   const navItems = [
-    { to: "/", label: "Dashboard", icon: LayoutDashboard },
+    { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/job-applications", label: "Applications", icon: Briefcase },
     { to: "/companies", label: "Companies", icon: Building2 },
     { to: "/tasks", label: "Tasks", icon: CheckSquare },
@@ -30,9 +30,7 @@ export function Sidebar({ className, onItemClick }: SidebarProps) {
       )}
     >
       <div className="flex items-center gap-2.5 px-3 py-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-semibold">
-          TJ
-        </div>
+        <img src="/logo.png" alt="TrackJ Logo" className="h-8 w-8 rounded-lg object-cover" />
         <div>
           <span className="font-semibold text-foreground tracking-tight block">
             TrackJ

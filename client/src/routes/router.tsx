@@ -6,11 +6,18 @@ import { RegisterPage } from "@/routes/RegisterPage";
 import { ProtectedLayout } from "@/features/auth/ProtectedLayout";
 import { ApplicationsPage } from "@/routes/ApplicationsPage";
 import { AiAssistantPage } from "@/routes/AiAssistantPage";
+import { LandingPage } from "@/routes/LandingPage";
+import { CompaniesPage } from "@/routes/CompaniesPage";
+import { TasksPage } from "@/routes/TasksPage";
 
 export const router = createBrowserRouter([
   {
     element: <App />,
     children: [
+      {
+        path: "/",
+        element: <LandingPage />,
+      },
       {
         path: "/login",
         element: <LoginPage />,
@@ -23,12 +30,20 @@ export const router = createBrowserRouter([
         element: <ProtectedLayout />,
         children: [
           {
-            path: "/",
+            path: "/dashboard",
             element: <HomePage />,
           },
           {
             path: "/job-applications",
             element: <ApplicationsPage />,
+          },
+          {
+            path: "/companies",
+            element: <CompaniesPage />,
+          },
+          {
+            path: "/tasks",
+            element: <TasksPage />,
           },
           {
             path: "/ai-assistant",

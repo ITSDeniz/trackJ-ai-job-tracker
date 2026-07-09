@@ -24,7 +24,7 @@ export function RegisterPage() {
 
     try {
       await register(email, password, name || undefined);
-      navigate("/", { replace: true });
+      navigate("/dashboard", { replace: true });
     } catch (err: unknown) {
       if (err instanceof ApiError) {
         setErrorMsg(err.message);
@@ -43,9 +43,7 @@ export function RegisterPage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8 rounded-xl border border-border bg-card p-8 shadow-sm">
         <div>
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-xl">
-            TJ
-          </div>
+          <img src="/logo.png" alt="TrackJ Logo" className="mx-auto h-12 w-12 rounded-lg object-cover" />
           <h2 className="mt-6 text-center text-3xl font-semibold tracking-tight text-foreground">
             Create your account
           </h2>
