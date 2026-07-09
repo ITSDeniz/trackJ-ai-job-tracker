@@ -30,7 +30,7 @@ export class GeminiAiService implements AiService {
 
     try {
       const model = this.genAI.getGenerativeModel({
-        model: "gemini-1.5-flash",
+        model: "gemini-2.5-flash",
         generationConfig: {
           responseMimeType: "application/json",
           responseSchema: {
@@ -80,10 +80,18 @@ export class GeminiAiService implements AiService {
         You are an expert technical recruiter and resume consultant. Review the candidate resume below.
         Provide constructive, high-impact critiques focusing on professional impact, results, layout structure, and language.
         
-        ${
-          targetJobDescription
-            ? `Compare it and tailor the suggestions against this Target Job Description:\n${targetJobDescription}\n`
-            : ""
+        Evaluate the resume objectively according to this scoring rubric, adjusted for the applicant's career level (e.g. student vs. experienced professional):
+        - 0 to 30: Non-resume inputs, extremely short/low-effort text (less than 100 words), or placeholders.
+        - 31 to 50: Poorly written or severely incomplete resume with major grammatical/formatting flaws, or lacking any real details.
+        - 51 to 70: A solid entry-level, student, or average professional resume. Has good structure and relevant skills, but has room to grow in terms of impact metrics and active language.
+        - 71 to 85: A strong professional resume with clear achievements, good formatting, and relevant experience.
+        - 86 to 100: An outstanding, world-class resume with extensive quantified metrics (%, $, time saved) for nearly all roles and perfect formatting.
+        
+        Evaluate the resume realistically based on its context. If it's a student or junior resume, do not penalize them for not having 10 years of experience, but check if their internships, projects, and skills are well-presented.
+        
+        ${targetJobDescription
+          ? `Compare and tailor the suggestions against this Target Job Description:\n${targetJobDescription}\n`
+          : ""
         }
         
         Resume text:
@@ -102,7 +110,7 @@ export class GeminiAiService implements AiService {
       console.error("Gemini API call failed:", err);
       throw new Error(
         "Failed to generate resume review. Gemini API error: " +
-          (err.message || err),
+        (err.message || err),
       );
     }
   }

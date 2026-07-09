@@ -24,6 +24,7 @@
     "npm": ">=10.0.0"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "bcryptjs": "^3.0.3",
     "jsonwebtoken": "^9.0.3"
   }

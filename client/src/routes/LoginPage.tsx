@@ -43,10 +43,10 @@ export function LoginPage() {
       <div className="w-full max-w-md space-y-8 rounded-xl border border-border bg-card p-8 shadow-sm">
         <div>
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-xl">
-            TP
+            TJ
           </div>
           <h2 className="mt-6 text-center text-3xl font-semibold tracking-tight text-foreground">
-            Sign in to TalentPilot
+            Sign in to TrackJ
           </h2>
           <p className="mt-2 text-center text-sm text-muted-foreground">
             Or{" "}

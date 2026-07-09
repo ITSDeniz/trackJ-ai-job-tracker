@@ -27,7 +27,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
         </Button>
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold text-foreground tracking-tight">
-            TalentPilot Control Center
+            TrackJ Control Center
           </span>
         </div>
       </div>

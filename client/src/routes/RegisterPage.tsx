@@ -44,7 +44,7 @@ export function RegisterPage() {
       <div className="w-full max-w-md space-y-8 rounded-xl border border-border bg-card p-8 shadow-sm">
         <div>
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-xl">
-            TP
+            TJ
           </div>
           <h2 className="mt-6 text-center text-3xl font-semibold tracking-tight text-foreground">
             Create your account

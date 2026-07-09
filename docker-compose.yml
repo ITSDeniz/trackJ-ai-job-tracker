@@ -3,13 +3,15 @@ version: "3.8"
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: talentpilot-postgres
+    container_name: trackj-postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: talentpilot
+      POSTGRES_DB: trackj
+
     ports:
-      - "5432:5432"
+      - "5433:5432"
+
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped

@@ -31,11 +31,11 @@ export function Sidebar({ className, onItemClick }: SidebarProps) {
     >
       <div className="flex items-center gap-2.5 px-3 py-2">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-semibold">
-          TP
+          TJ
         </div>
         <div>
           <span className="font-semibold text-foreground tracking-tight block">
-            TalentPilot
+            TrackJ
           </span>
           <span className="text-[10px] text-muted-foreground block font-medium -mt-0.5">
             AI Job Tracker

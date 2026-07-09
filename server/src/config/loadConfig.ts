@@ -9,7 +9,7 @@ const ConfigSchema = z.object({
   DATABASE_URL: z
     .string()
     .min(1)
-    .default("postgresql://postgres:postgres@localhost:5432/talentpilot"),
+    .default("postgresql://postgres:postgres@localhost:5432/trackj"),
   JWT_SECRET: z
     .string()
     .min(1)

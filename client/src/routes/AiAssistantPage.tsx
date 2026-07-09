@@ -221,16 +221,31 @@ export function AiAssistantPage() {
                       </span>
                     </div>
                     {/* Score Bubble */}
-                    <div className="flex items-center gap-2">
-                      <div className="flex flex-col items-center justify-center bg-primary/10 border border-primary/20 rounded-lg p-3 min-w-[70px] text-center">
-                        <span className="text-2xl font-bold text-primary">
-                          {reviewMutation.data.overallScore}
-                        </span>
-                        <span className="text-[8px] uppercase tracking-wider text-primary/70 font-semibold -mt-1">
-                          Score
-                        </span>
-                      </div>
-                    </div>
+                    {(() => {
+                      const score = reviewMutation.data.overallScore;
+                      let colorClass = "text-primary bg-primary/10 border-primary/20";
+                      if (score < 50) {
+                        colorClass = "text-destructive bg-destructive/10 border-destructive/20";
+                      } else if (score <= 70) {
+                        colorClass = "text-amber-500 bg-amber-500/10 border-amber-500/20";
+                      } else if (score <= 85) {
+                        colorClass = "text-primary bg-primary/10 border-primary/20";
+                      } else {
+                        colorClass = "text-emerald-500 bg-emerald-500/10 border-emerald-500/20";
+                      }
+                      return (
+                        <div className="flex items-center gap-2">
+                          <div className={`flex flex-col items-center justify-center border rounded-lg p-3 min-w-[70px] text-center ${colorClass}`}>
+                            <span className="text-2xl font-bold">
+                              {score}
+                            </span>
+                            <span className="text-[8px] uppercase tracking-wider font-semibold -mt-1 opacity-80">
+                              Score
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   {/* Feedback description block */}

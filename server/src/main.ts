@@ -5,5 +5,5 @@ const config = loadConfig();
 const app = createServer();
 
 app.listen(config.port, () => {
-  console.log(`TalentPilot API listening on port ${config.port}`);
+  console.log(`TrackJ API listening on port ${config.port}`);
 });

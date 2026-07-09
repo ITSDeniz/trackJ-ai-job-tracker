@@ -11,7 +11,7 @@ export function ProtectedLayout() {
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
           <span className="text-xs text-muted-foreground font-medium">
-            Loading TalentPilot...
+            Loading TrackJ...
           </span>
         </div>
       </div>
