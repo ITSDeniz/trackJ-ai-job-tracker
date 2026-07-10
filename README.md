@@ -139,6 +139,13 @@ trackj/
 
 ---
 
+## 🚀 Deployment
+
+For hosting this project in production (Database, Backend API, and Frontend Client), follow our step-by-step [Production Deployment Guide](file:///Users/deniz/mydocuments/programming/trackJ/trackJ/docs/deployment.md).
+
+---
+
 ## 📝 License
 
 MIT
+
