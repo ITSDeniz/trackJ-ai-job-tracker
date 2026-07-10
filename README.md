@@ -87,7 +87,15 @@ docker-compose up -d
 npm run prisma:migrate --workspace=server
 ```
 
-### 6. Start the development server
+### 6. Seed the database (Optional)
+
+To populate your test account database with mock companies and realistic job applications (Google, Meta, Stripe, Airbnb, Linear) for quick testing:
+
+```bash
+npx tsx server/src/seed.ts
+```
+
+### 7. Start the development server
 
 ```bash
 npm run dev
