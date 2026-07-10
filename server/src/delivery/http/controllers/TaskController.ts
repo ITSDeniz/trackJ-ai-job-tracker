@@ -39,9 +39,12 @@ export class TaskController {
 
       const result = CreateTaskSchema.safeParse(req.body);
       if (!result.success) {
-        res.status(400).json({
-          error: "Validation failed",
-          fields: result.error.flatten().fieldErrors,
+        res.status(422).json({
+          error: {
+            code: "validation_error",
+            message: "Validation failed",
+            fields: result.error.flatten().fieldErrors,
+          },
         });
         return;
       }
@@ -54,7 +57,12 @@ export class TaskController {
           where: { id: body.jobApplicationId, userId },
         });
         if (!app) {
-          res.status(400).json({ error: "Linked job application not found" });
+          res.status(400).json({
+            error: {
+              code: "not_found",
+              message: "Linked job application not found.",
+            },
+          });
           return;
         }
       }
@@ -112,9 +120,12 @@ export class TaskController {
 
       const result = UpdateTaskSchema.safeParse(req.body);
       if (!result.success) {
-        res.status(400).json({
-          error: "Validation failed",
-          fields: result.error.flatten().fieldErrors,
+        res.status(422).json({
+          error: {
+            code: "validation_error",
+            message: "Validation failed",
+            fields: result.error.flatten().fieldErrors,
+          },
         });
         return;
       }
@@ -127,7 +138,12 @@ export class TaskController {
           where: { id: body.jobApplicationId, userId },
         });
         if (!app) {
-          res.status(400).json({ error: "Linked job application not found" });
+          res.status(400).json({
+            error: {
+              code: "not_found",
+              message: "Linked job application not found.",
+            },
+          });
           return;
         }
       }

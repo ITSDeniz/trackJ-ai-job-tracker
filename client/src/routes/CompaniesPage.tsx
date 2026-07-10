@@ -68,28 +68,18 @@ export function CompaniesPage() {
 
   // Mutate Edit
   const editMutation = useMutation({
-    mutationFn: async (updated: Partial<CompanyData>) => {
-      return apiClient.put<any>(`/companies/${selectedCompany?.id}`, updated);
+    mutationFn: async ({ id, data }: { id: string; data: Partial<CompanyData> }) => {
+      return apiClient.put<CompanyData>(`/companies/${id}`, data);
     },
-    onSuccess: () => {
+    onSuccess: (updatedCompany) => {
       queryClient.invalidateQueries({ queryKey: ["companies"] });
       setSuccessMessage("Company details updated successfully.");
       setIsEditing(false);
-      // Update selected company view
-      const updated = companies.find((c) => c.id === selectedCompany?.id);
-      if (updated) {
-        setSelectedCompany({
-          ...selectedCompany!,
-          website: website || null,
-          location: location || null,
-          industry: industry || null,
-          size: size || null,
-          notes: notes || null,
-        });
-      }
+      // Update the slide-over with the fresh data returned from the server
+      setSelectedCompany(updatedCompany);
       setTimeout(() => setSuccessMessage(null), 3000);
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       setErrorMessage(err.message || "Failed to update details.");
       setTimeout(() => setErrorMessage(null), 4000);
     },
@@ -127,6 +117,8 @@ export function CompaniesPage() {
     e.preventDefault();
     setErrorMessage(null);
 
+    if (!selectedCompany) return;
+
     // Validate website format if entered
     if (website && !website.startsWith("http://") && !website.startsWith("https://")) {
       setErrorMessage("Website URL must start with http:// or https://");
@@ -134,11 +126,14 @@ export function CompaniesPage() {
     }
 
     editMutation.mutate({
-      website: website || null,
-      location: location || null,
-      industry: industry || null,
-      size: size || null,
-      notes: notes || null,
+      id: selectedCompany.id,
+      data: {
+        website: website || null,
+        location: location || null,
+        industry: industry || null,
+        size: size || null,
+        notes: notes || null,
+      },
     });
   };
 

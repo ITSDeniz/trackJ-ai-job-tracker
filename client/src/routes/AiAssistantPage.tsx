@@ -78,7 +78,7 @@ export function AiAssistantPage() {
           return (
             <button
               key={tab.id}
-              onClick={() => !tab.disabled && setActiveTab(tab.id as any)}
+              onClick={() => !tab.disabled && setActiveTab(tab.id as "review" | "analyzer" | "match" | "cover" | "interview")}
               disabled={tab.disabled}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 transition-all cursor-pointer ${
                 isActive
