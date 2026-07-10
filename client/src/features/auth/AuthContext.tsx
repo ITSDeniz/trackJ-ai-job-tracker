@@ -35,7 +35,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchCurrentUser = async () => {
-    const token = localStorage.getItem("tp_token");
+    const token = localStorage.getItem("tj_token");
     if (!token) {
       setIsLoading(false);
       return;
@@ -45,7 +45,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       const data = await apiClient.get<{ user: User }>("/auth/me");
       setUser(data.user);
     } catch {
-      localStorage.removeItem("tp_token");
+      localStorage.removeItem("tj_token");
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -64,7 +64,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         password: passwordPlain,
       },
     );
-    localStorage.setItem("tp_token", data.token);
+    localStorage.setItem("tj_token", data.token);
     setUser(data.user);
   };
 
@@ -83,7 +83,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   };
 
   const logout = () => {
-    localStorage.removeItem("tp_token");
+    localStorage.removeItem("tj_token");
     setUser(null);
   };
 

@@ -22,7 +22,7 @@ async function request<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const token = localStorage.getItem("tp_token");
+  const token = localStorage.getItem("tj_token");
   const headers = new Headers(options.headers);
 
   if (token) {
