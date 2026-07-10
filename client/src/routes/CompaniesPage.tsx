@@ -10,7 +10,6 @@ import {
   Trash2,
   Edit3,
   X,
-  Plus,
   AlertTriangle,
   Info,
 } from "lucide-react";
@@ -31,9 +30,6 @@ interface CompanyData {
   };
 }
 
-interface CompanyResponse {
-  data: CompanyData[];
-}
 
 export function CompaniesPage() {
   const queryClient = useQueryClient();
@@ -54,11 +50,11 @@ export function CompaniesPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["companies"],
     queryFn: async () => {
-      return apiClient.get<CompanyResponse>("/companies");
+      return apiClient.get<CompanyData[]>("/companies");
     },
   });
 
-  const companies = data?.data || [];
+  const companies = data || [];
 
   // Filtered list
   const filteredCompanies = companies.filter((c) => {

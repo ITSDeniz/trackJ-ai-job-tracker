@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -6,26 +7,28 @@ import {
   Square,
   Plus,
   Calendar,
-  Clock,
   Briefcase,
   Trash2,
   AlertCircle,
   X,
   CheckCircle,
   Search,
-  ChevronRight,
 } from "lucide-react";
 import { apiClient } from "@/lib/api/apiClient";
 import { Button } from "@/components/ui/button";
 
+
 interface JobApplicationBrief {
   id: string;
   title: string;
-  companyName: string; // wait, in client, job list response maps companyName string!
+  companyName: string;
 }
 
 interface ApiListResponse {
   data: JobApplicationBrief[];
+  pagination: {
+    total: number;
+  };
 }
 
 interface TaskData {
@@ -45,15 +48,22 @@ interface TaskData {
   } | null;
 }
 
-interface TaskResponse {
-  data: TaskData[];
-}
 
 export function TasksPage() {
   const queryClient = useQueryClient();
+  const location = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<"pending" | "completed">("pending");
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (location.state?.openCreateModal) {
+      setIsModalOpen(true);
+      // Clean location state history to prevent re-opening on manual refreshes
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
+
 
   // Form Fields
   const [title, setTitle] = useState("");
@@ -68,7 +78,7 @@ export function TasksPage() {
   const { data: tasksData, isLoading: tasksLoading } = useQuery({
     queryKey: ["tasks"],
     queryFn: async () => {
-      return apiClient.get<TaskResponse>("/tasks");
+      return apiClient.get<TaskData[]>("/tasks");
     },
   });
 
@@ -80,7 +90,7 @@ export function TasksPage() {
     },
   });
 
-  const tasks = tasksData?.data || [];
+  const tasks = tasksData || [];
   const applications = appsData?.data || [];
 
   // Mutations

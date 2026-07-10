@@ -361,9 +361,9 @@ export function HomePage() {
                   <Calendar className="h-4 w-4" /> Schedule Interview
                 </Button>
                 <Button
+                  onClick={() => navigate("/tasks", { state: { openCreateModal: true } })}
                   variant="outline"
-                  className="w-full flex items-center justify-start gap-2.5 py-2.5 text-muted-foreground hover:text-foreground cursor-not-allowed"
-                  disabled
+                  className="w-full flex items-center justify-start gap-2.5 py-2.5 text-muted-foreground hover:text-foreground"
                 >
                   <CheckSquare className="h-4 w-4" /> Create Task
                 </Button>

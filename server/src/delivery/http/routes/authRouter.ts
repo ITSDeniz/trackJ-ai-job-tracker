@@ -2,8 +2,8 @@ import { Router } from "express";
 import { z } from "zod";
 import { AuthController } from "../controllers/AuthController.js";
 import { validateRequest } from "../middleware/validateRequest.js";
-
 import { authMiddleware } from "../middleware/authMiddleware.js";
+import { authRateLimiter } from "../middleware/rateLimiter.js";
 
 export const authRouter = Router();
 const controller = new AuthController();
@@ -25,12 +25,16 @@ const LoginSchema = z.object({
 
 authRouter.post(
   "/register",
+  authRateLimiter,
   validateRequest(RegisterSchema),
   (req, res, next) => controller.register(req, res, next),
 );
 
-authRouter.post("/login", validateRequest(LoginSchema), (req, res, next) =>
-  controller.login(req, res, next),
+authRouter.post(
+  "/login",
+  authRateLimiter,
+  validateRequest(LoginSchema),
+  (req, res, next) => controller.login(req, res, next),
 );
 
 authRouter.get("/me", authMiddleware, (req, res, next) =>

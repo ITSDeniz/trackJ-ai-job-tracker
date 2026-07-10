@@ -9,6 +9,7 @@ import { AiAssistantPage } from "@/routes/AiAssistantPage";
 import { LandingPage } from "@/routes/LandingPage";
 import { CompaniesPage } from "@/routes/CompaniesPage";
 import { TasksPage } from "@/routes/TasksPage";
+import { NotFoundPage } from "@/routes/NotFoundPage";
 
 export const router = createBrowserRouter([
   {
@@ -50,6 +51,10 @@ export const router = createBrowserRouter([
             element: <AiAssistantPage />,
           },
         ],
+      },
+      {
+        path: "*",
+        element: <NotFoundPage />,
       },
     ],
   },
