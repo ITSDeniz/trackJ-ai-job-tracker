@@ -1,8 +1,10 @@
-import { Menu, User, LogOut, Sun, Moon } from "lucide-react";
+import { useState } from "react";
+import { Menu, User as UserIcon, LogOut, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/AuthContext";
 import { useTheme } from "@/features/theme/ThemeContext";
 import { motion, AnimatePresence } from "framer-motion";
+import { EditProfileModal } from "./EditProfileModal";
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -11,6 +13,7 @@ interface HeaderProps {
 export function Header({ onMenuToggle }: HeaderProps) {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   return (
     <header className="flex h-14 items-center justify-between border-b border-border bg-card px-4 text-card-foreground lg:px-6">
@@ -21,7 +24,6 @@ export function Header({ onMenuToggle }: HeaderProps) {
           size="icon"
           onClick={onMenuToggle}
           className="lg:hidden"
-          aria-label="Toggle navigation menu"
         >
           <Menu className="h-5 w-5" />
         </Button>
@@ -35,14 +37,18 @@ export function Header({ onMenuToggle }: HeaderProps) {
 
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsProfileOpen(true)}
+            className="flex items-center gap-2 hover:bg-muted/50 p-1.5 rounded-lg transition-colors cursor-pointer text-left focus:outline-none"
+            title="Edit profile settings"
+          >
             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-muted border border-border">
-              <User className="h-4 w-4 text-muted-foreground" />
+              <UserIcon className="h-4 w-4 text-muted-foreground" />
             </div>
-            <span className="hidden text-xs font-medium text-muted-foreground sm:block">
+            <span className="hidden text-xs font-medium text-muted-foreground sm:block max-w-[120px] truncate">
               {user?.name || user?.email || "Candidate"}
             </span>
-          </div>
+          </button>
 
           <Button
             type="button"
@@ -82,6 +88,8 @@ export function Header({ onMenuToggle }: HeaderProps) {
           </Button>
         </div>
       </div>
+
+      <EditProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
     </header>
   );
 }

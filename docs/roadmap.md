@@ -1,8 +1,8 @@
-# TalentPilot Roadmap
+# TrackJ Roadmap
 
 ## Product Direction
 
-TalentPilot helps job seekers run a disciplined, less stressful job search. The product combines structured tracking with selective AI assistance so users can understand what is active, what needs attention, and how to improve each application.
+TrackJ helps job seekers run a disciplined, less stressful job search. The product combines structured tracking with selective AI assistance so users can understand what is active, what needs attention, and how to improve each application.
 
 The roadmap favors a reliable core workflow before advanced automation. The first releases should make manual tracking excellent, then add AI where it removes repetitive work without reducing user control.
 

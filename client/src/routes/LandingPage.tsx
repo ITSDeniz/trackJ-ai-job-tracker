@@ -307,7 +307,7 @@ export function LandingPage() {
           </div>
           <div className="flex items-center gap-6">
             <a
-              href="https://github.com"
+              href="https://github.com/ITSDeniz/trackJ-ai-job-tracker"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-foreground transition-colors flex items-center gap-1.5"

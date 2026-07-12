@@ -25,6 +25,11 @@ interface AuthContextType {
     passwordPlain: string,
     name?: string,
   ) => Promise<void>;
+  updateProfile: (data: {
+    email?: string;
+    name?: string | null;
+    password?: string;
+  }) => Promise<void>;
   logout: () => void;
 }
 
@@ -82,6 +87,15 @@ export function AuthProvider({ children }: PropsWithChildren) {
     await login(email, passwordPlain);
   };
 
+  const updateProfile = async (data: {
+    email?: string;
+    name?: string | null;
+    password?: string;
+  }) => {
+    const res = await apiClient.patch<{ user: User }>("/auth/profile", data);
+    setUser(res.user);
+  };
+
   const logout = () => {
     localStorage.removeItem("tj_token");
     setUser(null);
@@ -93,6 +107,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     isLoading,
     login,
     register,
+    updateProfile,
     logout,
   };
 

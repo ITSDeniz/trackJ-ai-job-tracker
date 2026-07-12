@@ -4,6 +4,7 @@ import { AuthController } from "../controllers/AuthController.js";
 import { validateRequest } from "../middleware/validateRequest.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { authRateLimiter } from "../middleware/rateLimiter.js";
+import { UpdateProfileSchema } from "../schemas/userSchemas.js";
 
 export const authRouter = Router();
 const controller = new AuthController();
@@ -40,3 +41,11 @@ authRouter.post(
 authRouter.get("/me", authMiddleware, (req, res, next) =>
   controller.me(req, res, next),
 );
+
+authRouter.patch(
+  "/profile",
+  authMiddleware,
+  validateRequest(UpdateProfileSchema),
+  (req, res, next) => controller.updateProfile(req, res, next),
+);
+

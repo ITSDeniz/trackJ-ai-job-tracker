@@ -1,8 +1,8 @@
-# TalentPilot API Documentation
+# TrackJ API Documentation
 
 ## API Direction
 
-TalentPilot uses a REST-style HTTP API for communication between the React client and Express server.
+TrackJ uses a REST-style HTTP API for communication between the React client and Express server.
 
 The API should be predictable, typed, validated, and documented before implementation. Route handlers should remain thin and delegate product behavior to application use cases.
 

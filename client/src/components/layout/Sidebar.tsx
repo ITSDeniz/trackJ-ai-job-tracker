@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -5,8 +6,10 @@ import {
   Building2,
   CheckSquare,
   Sparkles,
+  MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { FeedbackModal } from "./FeedbackModal";
 
 interface SidebarProps {
   className?: string;
@@ -14,6 +17,8 @@ interface SidebarProps {
 }
 
 export function Sidebar({ className, onItemClick }: SidebarProps) {
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+
   const navItems = [
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/job-applications", label: "Applications", icon: Briefcase },
@@ -62,7 +67,18 @@ export function Sidebar({ className, onItemClick }: SidebarProps) {
         ))}
       </nav>
 
-      <div className="mt-auto border-t border-border pt-4">
+      <div className="mt-auto border-t border-border pt-4 space-y-3">
+        <button
+          onClick={() => {
+            if (onItemClick) onItemClick();
+            setIsFeedbackOpen(true);
+          }}
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer text-left focus:outline-none"
+        >
+          <MessageSquare className="h-4 w-4 shrink-0" />
+          Send Feedback
+        </button>
+
         <div className="flex items-center gap-3 rounded-lg bg-ai/5 border border-ai/10 p-3 text-xs text-muted-foreground">
           <Sparkles className="h-4 w-4 shrink-0 text-ai" />
           <div>
@@ -73,6 +89,8 @@ export function Sidebar({ className, onItemClick }: SidebarProps) {
           </div>
         </div>
       </div>
+
+      <FeedbackModal isOpen={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
     </aside>
   );
 }

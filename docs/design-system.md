@@ -1,8 +1,8 @@
-# TalentPilot Design System
+# TrackJ Design System
 
 ## Design Intent
 
-TalentPilot should feel like a calm command center for a demanding job search. The interface must help users scan active opportunities, understand what needs attention, and act without friction.
+TrackJ should feel like a calm command center for a demanding job search. The interface must help users scan active opportunities, understand what needs attention, and act without friction.
 
 The visual system should be restrained, legible, and work-focused. It should avoid marketing-page patterns inside the product experience.
 

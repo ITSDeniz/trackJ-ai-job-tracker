@@ -1,14 +1,14 @@
-# TalentPilot Architecture
+# TrackJ Architecture
 
 ## Architecture Goal
 
-TalentPilot uses clean architecture to keep product behavior independent from frameworks, databases, AI providers, and delivery mechanisms.
+TrackJ uses clean architecture to keep product behavior independent from frameworks, databases, AI providers, and delivery mechanisms.
 
 The system should be easy to test, safe to evolve, and clear about where each decision belongs.
 
 ## System Overview
 
-TalentPilot is organized around two delivery surfaces:
+TrackJ is organized around two delivery surfaces:
 
 - React client for the authenticated user experience.
 - Express server for API delivery, authentication boundaries, use case orchestration, persistence, and integrations.

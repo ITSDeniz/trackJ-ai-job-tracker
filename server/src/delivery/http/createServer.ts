@@ -7,6 +7,7 @@ import { jobApplicationRouter } from "./routes/jobApplicationRouter.js";
 import { companyRouter } from "./routes/companyRouter.js";
 import { aiRouter } from "./routes/aiRouter.js";
 import { taskRouter } from "./routes/taskRouter.js";
+import { feedbackRouter } from "./routes/feedbackRouter.js";
 import { authMiddleware } from "./middleware/authMiddleware.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { loadConfig } from "../../config/loadConfig.js";
@@ -38,6 +39,7 @@ export function createServer() {
   app.use("/api/v1/companies", authMiddleware, companyRouter);
   app.use("/api/v1/tasks", authMiddleware, taskRouter);
   app.use("/api/v1/ai", authMiddleware, aiRouter);
+  app.use("/api/v1/feedbacks", authMiddleware, feedbackRouter);
 
   app.use(errorHandler);
 

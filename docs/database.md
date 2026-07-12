@@ -1,8 +1,8 @@
-# TalentPilot Database Design
+# TrackJ Database Design
 
 ## Database Direction
 
-TalentPilot should use a relational database as the primary system of record. The product has structured entities, ownership rules, status transitions, timestamps, and reporting needs that fit relational modeling well.
+TrackJ should use a relational database as the primary system of record. The product has structured entities, ownership rules, status transitions, timestamps, and reporting needs that fit relational modeling well.
 
 Database decisions must support:
 
@@ -317,7 +317,7 @@ Indexes must be added based on expected query patterns, not speculation. Perform
 
 ## Privacy And Retention
 
-TalentPilot stores sensitive career data. The database design must minimize unnecessary retention.
+TrackJ stores sensitive career data. The database design must minimize unnecessary retention.
 
 Rules:
 

@@ -6,6 +6,7 @@ import { BcryptHashService } from "../../../infrastructure/security/BcryptHashSe
 import { JwtTokenService } from "../../../infrastructure/security/JwtTokenService.js";
 import { loadConfig } from "../../../config/loadConfig.js";
 import { AuthenticatedRequest } from "../middleware/authMiddleware.js";
+import { prisma } from "../../../infrastructure/database/prismaClient.js";
 
 const config = loadConfig();
 const userRepository = new PrismaUserRepository();
@@ -79,4 +80,55 @@ export class AuthController {
       next(error);
     }
   }
+
+  async updateProfile(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user!.id;
+      const { email, name, password } = req.body;
+
+      // 1. If email is changing, verify it is not already taken by another user
+      if (email) {
+        const existing = await userRepository.findByEmail(email.trim().toLowerCase());
+        if (existing && existing.id !== userId) {
+          res.status(400).json({
+            error: {
+              code: "conflict",
+              message: "Email address is already in use.",
+            },
+          });
+          return;
+        }
+      }
+
+      // 2. Build the data object dynamically
+      const updateData: any = {};
+      if (email) updateData.email = email.trim().toLowerCase();
+      if (name !== undefined) updateData.name = name;
+      if (password) {
+        updateData.password = await hashService.hash(password);
+      }
+
+      // 3. Update in database
+      const updated = await prisma.user.update({
+        where: { id: userId },
+        data: updateData,
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      res.status(200).json({
+        data: {
+          user: updated,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
+

@@ -34,3 +34,22 @@ export const aiRateLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Rate limiter for user feedback submissions
+// Limit to 5 submissions per hour per user account to protect database spam
+export const feedbackRateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 5,
+  message: {
+    error: {
+      code: "too_many_requests",
+      message: "You have exceeded your limit of 5 feedback submissions per hour. Thank you for your feedback!",
+    },
+  },
+  keyGenerator: (req) => {
+    return (req as any).user?.id || req.ip || "";
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+

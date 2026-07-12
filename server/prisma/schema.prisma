@@ -68,6 +68,7 @@ model User {
   documents       Document[]
   notes           Note[]
   aiOperations    AIOperation[]
+  feedbacks       Feedback[]
 
   @@map("users")
 }
@@ -261,3 +262,16 @@ model AIOperation {
   @@index([userId, jobApplicationId])
   @@map("ai_operations")
 }
+
+model Feedback {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  message   String
+  rating    Int?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("feedbacks")
+}
+
