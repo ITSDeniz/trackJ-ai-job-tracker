@@ -10,3 +10,6 @@ coverage/
 *.tsbuildinfo
 client/.vite/
 server/prisma/migrations/*/migration_lock.toml
+
+# AI assistant configuration — internal use only
+AGENTS.md
