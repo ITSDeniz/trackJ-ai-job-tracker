@@ -17,8 +17,23 @@ export function createServer() {
   const config = loadConfig();
 
   app.use(helmet());
-  app.use(cors());
-  app.use(express.json());
+  app.use(cors({
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        "https://track-j-ai-job-tracker-client.vercel.app",
+        "http://localhost:5173",
+        "http://localhost:4173",
+      ];
+      // Allow requests with no origin (e.g. mobile apps, curl, Postman)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS: Origin '${origin}' is not allowed.`));
+      }
+    },
+    credentials: true,
+  }));
+  app.use(express.json({ limit: "1mb" }));
 
   if (config.nodeEnv !== "production") {
     app.use((req, res, next) => {

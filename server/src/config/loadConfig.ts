@@ -10,10 +10,7 @@ const ConfigSchema = z.object({
     .string()
     .min(1)
     .default("postgresql://postgres:postgres@localhost:5432/trackj"),
-  JWT_SECRET: z
-    .string()
-    .min(1)
-    .default("supersecretjwtsecretkeychangeinproduction"),
+  JWT_SECRET: z.string().min(32, "JWT_SECRET must be at least 32 characters long."),
 });
 
 export function loadConfig() {
