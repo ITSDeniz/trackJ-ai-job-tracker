@@ -20,7 +20,7 @@ export function createServer() {
   app.use(cors({
     origin: (origin, callback) => {
       const allowedOrigins = [
-        "https://track-j-ai-job-tracker-client.vercel.app",
+        "https://trackj-ai-jobtracker.vercel.app",
         "http://localhost:5173",
         "http://localhost:4173",
       ];
