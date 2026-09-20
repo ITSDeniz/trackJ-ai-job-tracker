@@ -11,6 +11,7 @@ const ConfigSchema = z.object({
     .min(1)
     .default("postgresql://postgres:postgres@localhost:5432/trackj"),
   JWT_SECRET: z.string().min(32, "JWT_SECRET must be at least 32 characters long."),
+  GOOGLE_CLIENT_ID: z.string().optional(),
 });
 
 export function loadConfig() {
@@ -21,5 +22,6 @@ export function loadConfig() {
     port: parsed.PORT,
     databaseUrl: parsed.DATABASE_URL,
     jwtSecret: parsed.JWT_SECRET,
+    googleClientId: parsed.GOOGLE_CLIENT_ID,
   };
 }

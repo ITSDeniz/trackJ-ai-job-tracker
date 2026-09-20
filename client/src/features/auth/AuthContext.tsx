@@ -20,6 +20,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, passwordPlain: string) => Promise<void>;
+  loginWithGoogle: (idToken: string) => Promise<void>;
   register: (
     email: string,
     passwordPlain: string,
@@ -73,6 +74,18 @@ export function AuthProvider({ children }: PropsWithChildren) {
     setUser(data.user);
   };
 
+  const loginWithGoogle = async (idToken: string) => {
+    const data = await apiClient.post<{ user: User; token: string }>(
+      "/auth/google",
+      {
+        idToken,
+      },
+    );
+    localStorage.setItem("tj_token", data.token);
+    setUser(data.user);
+  };
+  
+
   const register = async (
     email: string,
     passwordPlain: string,
@@ -106,6 +119,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     isAuthenticated: !!user,
     isLoading,
     login,
+    loginWithGoogle,
     register,
     updateProfile,
     logout,

@@ -7,6 +7,8 @@ import { JwtTokenService } from "../../../infrastructure/security/JwtTokenServic
 import { loadConfig } from "../../../config/loadConfig.js";
 import { AuthenticatedRequest } from "../middleware/authMiddleware.js";
 import { prisma } from "../../../infrastructure/database/prismaClient.js";
+import { AuthenticateWithGoogle } from "../../../application/users/AuthenticateWithGoogle.js";
+import { GoogleAuthService } from "../../../infrastructure/security/GoogleAuthService.js";
 
 const config = loadConfig();
 const userRepository = new PrismaUserRepository();
@@ -15,6 +17,14 @@ const tokenService = new JwtTokenService(config.jwtSecret);
 
 const registerUseCase = new RegisterUser(userRepository, hashService);
 const loginUseCase = new LoginUser(userRepository, hashService, tokenService);
+
+const googleAuthService = new GoogleAuthService(config.googleClientId || "");
+const googleLoginUseCase = new AuthenticateWithGoogle(
+  userRepository,
+  googleAuthService,
+  tokenService,
+);
+
 
 export class AuthController {
   async register(req: Request, res: Response, next: NextFunction) {
@@ -54,6 +64,23 @@ export class AuthController {
       next(error);
     }
   }
+
+    async googleLogin(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { idToken } = req.body;
+      const result = await googleLoginUseCase.execute({ idToken });
+
+      res.status(200).json({
+        data: {
+          user: result.user,
+          token: result.token,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
 
   async me(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
