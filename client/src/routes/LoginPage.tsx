@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
 import { useAuth } from "@/features/auth/AuthContext";
 import { ApiError } from "@/lib/api/apiClient";
 import { Button } from "@/components/ui/button";
 
 export function LoginPage() {
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -66,7 +67,49 @@ export function LoginPage() {
           </div>
         )}
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <div className="flex justify-center">
+          <GoogleLogin
+            onSuccess={async (credentialResponse) => {
+              if (credentialResponse.credential) {
+                try {
+                  setIsSubmitting(true);
+                  setErrorMsg(null);
+                  await loginWithGoogle(credentialResponse.credential);
+                  navigate("/dashboard", { replace: true });
+                } catch (err: unknown) {
+                  if (err instanceof ApiError) {
+                    setErrorMsg(err.message);
+                  } else {
+                    setErrorMsg("Google sign-in failed. Please try again.");
+                  }
+                } finally {
+                  setIsSubmitting(false);
+                }
+              }
+            }}
+            onError={() => {
+              setErrorMsg("Google sign-in was cancelled or encountered an error.");
+            }}
+            shape="rectangular"
+            theme="outline"
+            size="large"
+            width="100%"
+            text="signin_with"
+          />
+        </div>
+
+        <div className="relative my-4">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-border" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-card px-2 text-muted-foreground">
+              Or continue with email
+            </span>
+          </div>
+        </div>
+
+        <form className="mt-4 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4 rounded-md">
             <div>
               <label

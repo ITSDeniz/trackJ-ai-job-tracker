@@ -1,10 +1,10 @@
-import { rateLimit } from "express-rate-limit";
+import { rateLimit, ipKeyGenerator } from "express-rate-limit";
 
 // Rate limiter for login & registration requests
 // Limit to 5 attempts per 15 minutes per IP to prevent brute-force attacks.
 export const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5,
+  max: 20, // Increased for smooth development and testing
   message: {
     error: {
       code: "too_many_requests",
@@ -20,6 +20,7 @@ export const authRateLimiter = rateLimit({
 export const aiRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 5,
+  validate: { keyGeneratorIpFallback: false },
   message: {
     error: {
       code: "too_many_requests",
@@ -28,7 +29,8 @@ export const aiRateLimiter = rateLimit({
   },
   keyGenerator: (req) => {
     // Scope rate limiting by authenticated user ID if available, fallback to IP
-    return (req as any).user?.id || req.ip || "";
+    const userId = (req as { user?: { id?: string } }).user?.id;
+    return userId || ipKeyGenerator(req.ip || "");
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -39,6 +41,7 @@ export const aiRateLimiter = rateLimit({
 export const feedbackRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 5,
+  validate: { keyGeneratorIpFallback: false },
   message: {
     error: {
       code: "too_many_requests",
@@ -46,7 +49,8 @@ export const feedbackRateLimiter = rateLimit({
     },
   },
   keyGenerator: (req) => {
-    return (req as any).user?.id || req.ip || "";
+    const userId = (req as { user?: { id?: string } }).user?.id;
+    return userId || ipKeyGenerator(req.ip || "");
   },
   standardHeaders: true,
   legacyHeaders: false,
