@@ -24,6 +24,13 @@ const LoginSchema = z.object({
   }),
 });
 
+const GoogleLoginSchema = z.object({
+  body: z.object({
+    idToken: z.string().min(1, "Google ID Token is required."),
+  }),
+});
+
+
 authRouter.post(
   "/register",
   authRateLimiter,
@@ -37,6 +44,14 @@ authRouter.post(
   validateRequest(LoginSchema),
   (req, res, next) => controller.login(req, res, next),
 );
+
+authRouter.post(
+  "/google",
+  authRateLimiter,
+  validateRequest(GoogleLoginSchema),
+  (req, res, next) => controller.googleLogin(req, res, next),
+);
+
 
 authRouter.get("/me", authMiddleware, (req, res, next) =>
   controller.me(req, res, next),
